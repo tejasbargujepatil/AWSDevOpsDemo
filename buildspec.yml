@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Install phase - nothing to install for static site"
+
+  pre_build:
+    commands:
+      - echo "Pre-build checks..."
+      - echo "Source files:"
+      - ls -la
+
+  build:
+    commands:
+      - echo "Build started on $(date)"
+      - echo "Copying files to output..."
+
+  post_build:
+    commands:
+      - echo "Build completed on $(date)"
+      - aws s3 sync . s3://$S3_BUCKET --delete --exclude ".git/*" --exclude "buildspec.yml" --exclude "README.md"
+      - echo "Deploy to S3 done!"
+
+artifacts:
+  files:
+    - "**/*"
+  exclude-paths:
+    - ".git/**"
+    - "buildspec.yml"
